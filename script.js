@@ -1,5 +1,7 @@
 const books = [];
 const RENDER_EVENT = 'render-book';
+const SAVED_EVENT = 'saved-book';
+const STORAGE_KEY = 'Book_APPS';
 
 function addBook() {
     const inputJudul = document.getElementById('inputBookTitle').value;
@@ -7,7 +9,7 @@ function addBook() {
     const inputTahun = parseInt(document.getElementById('inputBookYear').value);
     const isComplete = document.getElementById('inputBookIsComplete').checked;
     const bookId = generateId();
-    const bookObject = generateBookObject(bookId, inputJudul, inputPenulis, inputTahun, isComplete, false);
+    const bookObject = generateBookObject(bookId, inputJudul, inputPenulis, inputTahun, isComplete,);
     books.push(bookObject);
    
     document.dispatchEvent(new Event(RENDER_EVENT));
@@ -29,14 +31,14 @@ function generateBookObject(id, title, author, year, isComplete) {
 }
 
 function makeBook(bookObject) {
-    const inputJudul = document.createElement('h3');
+    const inputJudul = document.createElement('h2');
     inputJudul.innerText = bookObject.title;
 
     const inputPenulis = document.createElement('p');
-    inputPenulis.innerText = bookObject.author;
+    inputPenulis.innerText = "Penulis :" + bookObject.author;
 
     const inputTahun = document.createElement('p');
-    inputTahun.innerText = bookObject.year;
+    inputTahun.innerText = "Tahun :" + bookObject.year;
 
     const textContainer = document.createElement('div');
     textContainer.classList.add('book_item');
@@ -47,47 +49,47 @@ function makeBook(bookObject) {
     container.append(textContainer);
     container.setAttribute('id', 'book-${bookObject.id}')
 
-    const btnAct = document.createElement('div');
-    btnAct.classList.add('action');
+    const buttonContainer = document.createElement('div');
+    buttonContainer.classList.add('action');
 
     if (bookObject.isComplete) {
         const undoButton = document.createElement("button");
         undoButton.classList.add("green");
         undoButton.innerText = "Belum selesai dibaca";
         undoButton.addEventListener("click", function () {
-            undoButton(bookList.id);
+            removeBookFromComplete(bookObject.id);
         });
 
         const removeButton = document.createElement("button");
         removeButton.classList.add("red");
         removeButton.innerText = "Hapus Buku";
         removeButton.addEventListener("click", function () {
-            removeBooks(bookList.id);
-            alert('Jangan lupa baca buku ini lagi yaa...')
+            document.getElementById('book-${bookObject.id}').remove()
+            deleteBookFromComplete(bookObject.id)
         });
 
-        btnAct.append(incompleteButton, removeButton);
+        buttonContainer.append(undoButton, removeButton);
 
     } else {
         const completeButton = document.createElement("button");
         completeButton.classList.add("green");
         completeButton.innerText = "Selesai dibaca";
         completeButton.addEventListener("click", function () {
-            addBookToCompleted(bookList.id);
+            addBookToCompleted(bookObject.id);
         });
 
         const removeButton = document.createElement("button");
         removeButton.classList.add("red");
         removeButton.innerText = "Hapus Buku";
         removeButton.addEventListener("click", function () {
-            removeBooks(bookList.id);
-            alert('Menghapus buku')
+            document.getElementById('book-${bookObject.id}').remove()
+            deleteBookFromComplete(bookObject.id)
         });
 
-        btnAct.append(completeButton, removeButton);
+        buttonContainer.append(completeButton, removeButton);
     }
 
-    container.append(btnAct);
+    //container.append(buttonContainer);
     return container;
 }
 
@@ -148,8 +150,7 @@ function saveData() {
     }
 }
 
-const SAVED_EVENT = 'saved-book';
-const STORAGE_KEY = 'BOOK_APPS';
+
 
 function isStorageExist(){
     if(typeof(Storage) === undefined){
@@ -163,8 +164,8 @@ function loadDataFromStorage(){
     const serializedData = localStorage.getItem(STORAGE_KEY);
     let data = JSON.parse(serializedData);
     if (data !== null){
-        for(const book of data){
-            books.push(book);
+        for(const bookShelf of data){
+            books.push(bookShelf);
         }
     }
     document.dispatchEvent(new Event(RENDER_EVENT));
@@ -184,10 +185,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.addEventListener(RENDER_EVENT, function () {
     //console.log(books);
-    const uncompletedBOOKList = document.getElementById('incompleteBookshelfList');
+    const uncompletedBOOKList = document.getElementById("incompleteBookshelfList");
     uncompletedBOOKList.innerHTML = '';
  
-    const completedBOOKList = document.getElementById('completeBookshelfList');
+    const completedBOOKList = document.getElementById("completeBookshelfList");
     completedBOOKList.innerHTML = '';
 
     for (const bookItem of books) {
@@ -202,5 +203,5 @@ document.addEventListener(RENDER_EVENT, function () {
 });  
 
 document.addEventListener(SAVED_EVENT, function () {
-    console.log(localStorage.getItem(STORAGE_KEY));
+    //console.log(localStorage.getItem(STORAGE_KEY));
 });
